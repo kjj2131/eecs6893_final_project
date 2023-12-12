@@ -1,5 +1,5 @@
 page_origin =
-  "http://localhost/eecs6893_final_project_website/src/main_page.html";
+  "*";
 weights_url =
   "https://storage.googleapis.com/eecs6893_project/apache_data/weights_ML2_GBReg_df.csv";
 return_url =
