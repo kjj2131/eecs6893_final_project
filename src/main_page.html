@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+    <style>
+      .wrapper {
+        display: flex;
+      }
+      .pie {
+        text-align: center;
+        border: 1px solid black;
+        width: 900px;
+        height: auto;
+        margin: 0px 10px;
+      }
+      .line {
+        text-align: center;
+        border: 1px solid black;
+        width: 700px;
+        height: auto;
+        margin: 10px 10px;
+      }
+      .stacked-line {
+        text-align: center;
+        border: 1px solid black;
+        width: auto;
+        height: 700px;
+      }
+      .info {
+        border: 1px solid black;
+        margin: 0px 0px 10px 0px;
+        text-align: center;
+      }
+      .select-box {
+        display: block;
+        margin: 0px auto;
+      }
+      h1 {
+        margin: 20px 10px 20px 0px;
+        color: blue;
+      }
+      .label-text {
+        margin: 10px 10px;
+      }
+      .value-text {
+        font-weight: bold;
+        margin: auto 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <script src="main_script.js?new_version"></script>
+    <h1 style="color: Green; text-align: center">
+      Portfolio Optimization Based on Machine Learning and Sentiment Analysis
+    </h1>
+    <div class="wrapper">
+      <div class="pie">
+        <h1>Suggested Investment Weights</h1>
+        <select id="selectDateDropdown" class="select-box"></select>
+        <div id="weightsPie"></div>
+      </div>
+      <div>
+        <div class="info">
+          <h1>Portfolio Statistics</h1>
+          <div class="wrapper">
+            <p id="currentValueLabel" class="label-text"></p>
+            <p id="currentValueText" class="value-text"></p>
+          </div>
+          <div class="wrapper">
+            <p id="currentSharpe" class="label-text"></p>
+            <p id="currentSharpeValueText" class="value-text"></p>
+          </div>
+          <div class="wrapper">
+            <p id="currentSharpeBm" class="label-text"></p>
+            <p id="currentSharpeValueTextBm" class="value-text"></p>
+          </div>
+        </div>
+        <div class="stacked-line">
+          <h1>Suggested Weights Over Time</h1>
+          <div id="stackedWeightsGraph"></div>
+        </div>
+      </div>
+    </div>
+    <div class="wrapper">
+      <div class="line">
+        <h1>Historical Portfolio Returns</h1>
+        <div id="returnsChart"></div>
+      </div>
+      <div class="line">
+        <h1>Historical Portfolio Sharpe Ratio</h1>
+        <div id="sharpeChart"></div>
+      </div>
+    </div>
+    <div class="wrapper">
+      <div class="line">
+        <h1>Historical Portfolio Value ($)</h1>
+        <div id="valueChart"></div>
+      </div>
+    </div>
+  </body>
+</html>
