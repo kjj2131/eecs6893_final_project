@@ -56,7 +56,7 @@ function createPie(svgId, data, domain, date) {
   g.append("text")
     .attr("transform", (d) => "translate(" + labelArc.centroid(d) + ")")
     .attr("dy", ".35em")
-    .text((d) => (d.data.percent != 0 ? d.data.ticker + "%" : ""))
+    .text((d) => (d.data.percent != 0 ? d.data.ticker : ""))
     .style("text-anchor", "middle")
     .style("font-size", 14);
 
@@ -80,7 +80,7 @@ function createLineGraph(
 ) {
   // Set the dimesions and margins of the histogram graph
   var margin = { top: 30, right: 30, bottom: 30, left: 50 },
-    width = 660 - margin.left - margin.right,
+    width = 760 - margin.left - margin.right,
     height = 600 - margin.top - margin.bottom;
 
   const svg = d3
@@ -157,7 +157,7 @@ function createLineGraph(
 
   legend
     .append("rect")
-    .attr("x", width - 162)
+    .attr("x", width - 222)
     .attr("y", function (d, i) {
       return i * 30;
     })
@@ -169,7 +169,7 @@ function createLineGraph(
 
   legend
     .append("text")
-    .attr("x", width - 145)
+    .attr("x", width - 205)
     .attr("y", function (d, i) {
       return i * 30 + 9;
     })
