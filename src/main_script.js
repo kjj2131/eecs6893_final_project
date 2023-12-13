@@ -1,11 +1,11 @@
 page_origin =
   "*";
 weights_url =
-  "https://storage.googleapis.com/eecs6893_project/apache_data/weights_ML2_GBReg_df.csv";
+  "https://storage.googleapis.com/eecs6893_project/apache_data/w_hist.csv";
 return_url =
-  "https://storage.googleapis.com/eecs6893_project/dummy_data/return.csv";
+  "https://storage.googleapis.com/eecs6893_project/apache_data/return_summary_csv.csv";
 sharpe_url =
-  "https://storage.googleapis.com/eecs6893_project/dummy_data/sharpe.csv";
+  "https://storage.googleapis.com/eecs6893_project/apache_data/sharpe_summary_csv";
 
 function createPie(svgId, data, domain, date) {
   // Set the dimensions and margins of the pie graph
@@ -304,7 +304,7 @@ function createStackedLineGraph(svgId, data) {
 }
 
 // Create pie chart of recommended weights
-d3.csv(weights_url, { mode: "cors", headers: { origin: page_origin } }).then(
+d3.csv(weights_url, { mode: "cors", headers: { origin: page_origin} }).then(
   function (data) {
     // Holds the weights for all the days
     weights = new Map();
@@ -315,11 +315,9 @@ d3.csv(weights_url, { mode: "cors", headers: { origin: page_origin } }).then(
     stacked_data = [];
     // date_key = "DATE";
     // multiply_percent = false;
-    // format_date = false;
-    date_key = "";
+    date_key = "Date";
     multiply_percent = true;
-    format_date = true;
-    parseDate = d3.timeParse("%m/%d/%y");
+    parseDate = d3.timeParse("%m/%d/%Y");
     data.forEach(function (d) {
       // Parse the date and weights for each day in the csv
       date = "";
@@ -328,30 +326,25 @@ d3.csv(weights_url, { mode: "cors", headers: { origin: page_origin } }).then(
       balance = 0;
       for ([key, val] of Object.entries(d)) {
         if (key == date_key) {
-          if (format_date) {
-            date_parts = val.split("-");
-            date = date_parts[1] + "-" + date_parts[2] + "-" + date_parts[0];
-          } else {
             date = val;
-          }
         } else {
           if (key != "CurrentBalance" && key != "Balance") {
             weight = parseFloat(val.slice(0, -1));
             weight = multiply_percent ? (weight * 100).toFixed(2) : weight;
             day_weights.push({ percent: weight, ticker: key });
             tickers.push(key);
-          } else if (key == "Balance" || key == "Current Balance") {
-            balance = parseFloat(val.replace(/,/g, "")).toFixed(2);
           }
         }
       }
       weights.set(date, { weights: day_weights, domain: tickers });
-      all_dates.push(date);
-      balances.push({
-        Date: parseDate(date),
-        Type: "Portfolio Value ($)",
-        Value: balance,
-      });
+      if(all_dates[all_dates.length-1]==date)
+      {
+        stacked_data=stacked_data.slice(0,-day_weights.length);
+      }
+      else
+      {
+        all_dates.push(date);
+      }
       day_weights.forEach(function (d) {
         stacked_data.push({
           data_date: parseDate(date),
@@ -401,45 +394,28 @@ d3.csv(weights_url, { mode: "cors", headers: { origin: page_origin } }).then(
     last_date = all_dates[0];
     current_date = last_date;
     update(last_date);
-    // Create line graph for portfolio value
-    createLineGraph(
-      "#valueChart",
-      balances,
-      "Value",
-      850000,
-      1100000,
-      "Date",
-      "Value ($)",
-      850000
-    );
 
     // Create stacked line graph for weight suggestions over time
     createStackedLineGraph("#stackedWeightsGraph", stacked_data);
-
-    last_balance = balances[balances.length-1]
-    current_balance_text = 'Last Balance Ending ' + d3.timeFormat('%m-%d-%Y')(last_balance.Date) + ':';
-    current_balance_value = '$' + last_balance.Value;
-    d3.select("body").select('#currentValueLabel').text(current_balance_text);
-    d3.select("body").select('#currentValueText').text(current_balance_value);
   }
 );
 
 d3.csv(return_url, { mode: "cors", headers: { origin: page_origin } }).then(
   function (data) {
     date_column = "Date";
-    benchmark_column = "AverageReturn(S&P500)";
-    portfolio_column = "AverageReturn(Portfolio)";
-    parseDate = d3.timeParse("%b %Y");
+    benchmark_column = "S&P Avg Return  (30 days)";
+    portfolio_column = "Portfolio Avg Return (30 days)";
+    parseDate = d3.timeParse("%m/%d/%Y");
     processed_data = [];
     min_value = 0;
     max_value = 0;
     data.forEach(function (d) {
-      d[benchmark_column] = parseFloat(
-        d[benchmark_column].slice(0, -1)
-      ).toFixed(2);
-      d[portfolio_column] = parseFloat(
+      d[benchmark_column] = (parseFloat(
+        (d[benchmark_column]).slice(0, -1)
+      )*100).toFixed(2);
+      d[portfolio_column] = (parseFloat(
         d[portfolio_column].slice(0, -1)
-      ).toFixed(2);
+      )*100).toFixed(2);
       formatted_data_bm = {
         Date: parseDate(d[date_column]),
         Type: benchmark_column,
@@ -462,24 +438,48 @@ d3.csv(return_url, { mode: "cors", headers: { origin: page_origin } }).then(
       min_value,
       max_value,
       "Date",
-      "Return (%)",
+      "Avg 30 Day Return (%)",
       0
     );
+    last_return = data[data.length-1];
+
+    portfolio_text =  portfolio_column.trim()+' Ending ' + last_return[date_column] + ':';
+    portfolio_value = last_return[portfolio_column] + '%';
+    d3.select("body").select('#averageReturnPf').text(portfolio_text);
+    d3.select("body").select('#averageReturnPfText').text(portfolio_value);
+
+    bm_text =  benchmark_column.trim()+' Ending ' + last_return[date_column] + ':';
+    bm_value = last_return[benchmark_column]+'%';
+    d3.select("body").select('#averageReturnBm').text(bm_text);
+    d3.select("body").select('#averageReturnBmText').text(bm_value);
+
+    pf_sd_column='Portfolio Return Std (30 days)';
+    bm_sd_column='S&P Return Std (30 days)';
+
+    portfolio_sd_text =  pf_sd_column.trim()+' Ending ' + last_return[date_column] + ':';
+    portfolio_sd_value = parseFloat(last_return[pf_sd_column]).toFixed(5);
+    d3.select("body").select('#returnSdPf').text(portfolio_sd_text);
+    d3.select("body").select('#returnSdPfText').text(portfolio_sd_value);
+
+    bm_sd_text =  bm_sd_column.trim()+' Ending ' + last_return[date_column] + ':';
+    bm_sd_value = parseFloat(last_return[bm_sd_column]).toFixed(5);
+    d3.select("body").select('#returnSdBm').text(bm_sd_text);
+    d3.select("body").select('#returnSdBmText').text(bm_sd_value);
   }
 );
 
 d3.csv(sharpe_url, { mode: "cors", headers: { origin: page_origin } }).then(
   function (data) {
     date_column = "Date";
-    benchmark_column = " Sharpe ratio (S&P 500)";
-    portfolio_column = " Sharpe ratio (Portfolio)";
-    parseDate = d3.timeParse("%b %Y");
+    benchmark_column = "Sharpe Ratio S&P (30 days)";
+    portfolio_column = "Sharpe Ratio Portfolio (30 days)";
+    parseDate = d3.timeParse("%m/%d/%Y");
     processed_data = [];
     min_value = 0;
     max_value = 0;
     data.forEach(function (d) {
-      d[benchmark_column] = parseFloat(d[benchmark_column].trim()).toFixed(2);
-      d[portfolio_column] = parseFloat(d[portfolio_column].trim()).toFixed(2);
+      d[benchmark_column] = parseFloat(d[benchmark_column]).toFixed(2);
+      d[portfolio_column] = parseFloat(d[portfolio_column]).toFixed(2);
       formatted_data_bm = {
         Date: parseDate(d[date_column]),
         Type: benchmark_column,
