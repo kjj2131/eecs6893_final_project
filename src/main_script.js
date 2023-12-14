@@ -1,5 +1,4 @@
-page_origin =
-  "*";
+page_origin = "*";
 weights_url =
   "https://storage.googleapis.com/eecs6893_project/apache_data/w_hist.csv";
 return_url =
@@ -66,116 +65,6 @@ function createPie(svgId, data, domain, date) {
     .text((d) => (d.data.percent != 0 ? d.data.percent + "%" : ""))
     .style("text-anchor", "middle")
     .style("font-size", 12);
-}
-
-function createLineGraph(
-  svgId,
-  data,
-  value_column,
-  min_value,
-  max_value,
-  xlabel,
-  ylabel,
-  xaxisloc
-) {
-  // Set the dimesions and margins of the histogram graph
-  var margin = { top: 30, right: 30, bottom: 30, left: 50 },
-    width = 760 - margin.left - margin.right,
-    height = 600 - margin.top - margin.bottom;
-
-  const svg = d3
-    .select(svgId)
-    .append("svg")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
-    .style("margin", "30px 0px")
-    .append("g")
-    .attr("transform", `translate(${margin.left}, ${margin.top})`);
-
-  const grouped_data = d3.group(data, (d) => d.Type);
-
-  const xScale = d3
-    .scaleTime()
-    .domain(d3.extent(data, (d) => d["Date"]))
-    .range([0, width - 180]);
-
-  const yScale = d3
-    .scaleLinear()
-    .domain([min_value, max_value])
-    .range([height - 10, 10]);
-
-  svg
-    .append("g")
-    .attr("transform", `translate(0, ${yScale(xaxisloc)})`)
-    .call(d3.axisBottom(xScale).tickFormat(d3.timeFormat("%m-%Y")));
-
-  svg.append("g").call(d3.axisLeft(yScale));
-
-  const color = d3
-    .scaleOrdinal()
-    .domain(grouped_data.keys())
-    .range(d3.schemeSet1);
-
-  const line = d3
-    .line()
-    .x((d) => {
-      return xScale(d["Date"]);
-    })
-    .y((d) => yScale(d[value_column]));
-
-  svg
-    .selectAll(".line")
-    .data(grouped_data)
-    .enter()
-    .append("path")
-    .attr("fill", "none")
-    .attr("stroke", (d) => color(d[0]))
-    .attr("stroke-width", 1.5)
-    .attr("d", (d) => line(Array.from(d.values())[1]));
-
-  // Add X axis label:
-  svg
-    .append("text")
-    .attr("text-anchor", "middle")
-    .attr("x", width / 2 - margin.right * 2)
-    .attr("y", height + margin.top)
-    .text(xlabel);
-  // Y axis label:
-  svg
-    .append("text")
-    .attr("text-anchor", "middle")
-    .attr("y", 0)
-    .attr("x", 0)
-    .text(ylabel);
-
-  var legend = svg
-    .selectAll(".g")
-    .data(grouped_data)
-    .enter()
-    .append("g")
-    .attr("class", "legend");
-
-  legend
-    .append("rect")
-    .attr("x", width - 222)
-    .attr("y", function (d, i) {
-      return i * 30;
-    })
-    .attr("width", 10)
-    .attr("height", 10)
-    .style("fill", function (d) {
-      return color(d[0]);
-    });
-
-  legend
-    .append("text")
-    .attr("x", width - 205)
-    .attr("y", function (d, i) {
-      return i * 30 + 9;
-    })
-    .text(function (d) {
-      return d[0];
-    });
 }
 
 function createStackedLineGraph(svgId, data) {
@@ -282,7 +171,7 @@ function createStackedLineGraph(svgId, data) {
 
   legend
     .append("rect")
-    .attr("x", width-margin.right+10)
+    .attr("x", width - margin.right + 10)
     .attr("y", function (d, i) {
       return i * 30;
     })
@@ -294,7 +183,7 @@ function createStackedLineGraph(svgId, data) {
 
   legend
     .append("text")
-    .attr("x", width-margin.right+30)
+    .attr("x", width - margin.right + 30)
     .attr("y", function (d, i) {
       return i * 30 + 9;
     })
@@ -304,7 +193,7 @@ function createStackedLineGraph(svgId, data) {
 }
 
 // Create pie chart of recommended weights
-d3.csv(weights_url, { mode: "cors", headers: { origin: page_origin} }).then(
+d3.csv(weights_url, { mode: "cors", headers: { origin: page_origin } }).then(
   function (data) {
     // Holds the weights for all the days
     weights = new Map();
@@ -326,7 +215,7 @@ d3.csv(weights_url, { mode: "cors", headers: { origin: page_origin} }).then(
       balance = 0;
       for ([key, val] of Object.entries(d)) {
         if (key == date_key) {
-            date = val;
+          date = val;
         } else {
           if (key != "CurrentBalance" && key != "Balance") {
             weight = parseFloat(val.slice(0, -1));
@@ -337,12 +226,9 @@ d3.csv(weights_url, { mode: "cors", headers: { origin: page_origin} }).then(
         }
       }
       weights.set(date, { weights: day_weights, domain: tickers });
-      if(all_dates[all_dates.length-1]==date)
-      {
-        stacked_data=stacked_data.slice(0,-day_weights.length);
-      }
-      else
-      {
+      if (all_dates[all_dates.length - 1] == date) {
+        stacked_data = stacked_data.slice(0, -day_weights.length);
+      } else {
         all_dates.push(date);
       }
       day_weights.forEach(function (d) {
@@ -405,66 +291,34 @@ d3.csv(return_url, { mode: "cors", headers: { origin: page_origin } }).then(
     date_column = "Date";
     benchmark_column = "S&P Avg Return  (30 days)";
     portfolio_column = "Portfolio Avg Return (30 days)";
-    parseDate = d3.timeParse("%m/%d/%Y");
-    processed_data = [];
-    min_value = 0;
-    max_value = 0;
-    data.forEach(function (d) {
-      d[benchmark_column] = (parseFloat(
-        (d[benchmark_column]).slice(0, -1)
-      )*100).toFixed(2);
-      d[portfolio_column] = (parseFloat(
-        d[portfolio_column].slice(0, -1)
-      )*100).toFixed(2);
-      formatted_data_bm = {
-        Date: parseDate(d[date_column]),
-        Type: benchmark_column,
-        Return: d[benchmark_column],
-      };
-      formatted_data_pf = {
-        Date: parseDate(d[date_column]),
-        Type: portfolio_column,
-        Return: d[portfolio_column],
-      };
-      processed_data.push(formatted_data_bm);
-      processed_data.push(formatted_data_pf);
-      min_value = Math.min(min_value, d[benchmark_column], d[portfolio_column]);
-      max_value = Math.max(max_value, d[benchmark_column], d[portfolio_column]);
-    });
-    createLineGraph(
-      "#returnsChart",
-      processed_data,
-      "Return",
-      min_value,
-      max_value,
-      "Date",
-      "Avg 30 Day Return (%)",
-      0
-    );
-    last_return = data[data.length-1];
+    pf_sd_column = "Portfolio Return Std (30 days)";
+    bm_sd_column = "S&P Return Std (30 days)";
 
-    portfolio_text =  portfolio_column.trim()+' Ending ' + last_return[date_column] + ':';
-    portfolio_value = last_return[portfolio_column] + '%';
-    d3.select("body").select('#averageReturnPf').text(portfolio_text);
-    d3.select("body").select('#averageReturnPfText').text(portfolio_value);
+    last_return = data[data.length - 1];
 
-    bm_text =  benchmark_column.trim()+' Ending ' + last_return[date_column] + ':';
-    bm_value = last_return[benchmark_column]+'%';
-    d3.select("body").select('#averageReturnBm').text(bm_text);
-    d3.select("body").select('#averageReturnBmText').text(bm_value);
+    portfolio_text =
+      portfolio_column.trim() + " Ending " + last_return[date_column] + ":";
+    portfolio_value = last_return[portfolio_column] + "%";
+    d3.select("body").select("#averageReturnPf").text(portfolio_text);
+    d3.select("body").select("#averageReturnPfText").text(portfolio_value);
 
-    pf_sd_column='Portfolio Return Std (30 days)';
-    bm_sd_column='S&P Return Std (30 days)';
+    bm_text =
+      benchmark_column.trim() + " Ending " + last_return[date_column] + ":";
+    bm_value = last_return[benchmark_column] + "%";
+    d3.select("body").select("#averageReturnBm").text(bm_text);
+    d3.select("body").select("#averageReturnBmText").text(bm_value);
 
-    portfolio_sd_text =  pf_sd_column.trim()+' Ending ' + last_return[date_column] + ':';
+    portfolio_sd_text =
+      pf_sd_column.trim() + " Ending " + last_return[date_column] + ":";
     portfolio_sd_value = parseFloat(last_return[pf_sd_column]).toFixed(5);
-    d3.select("body").select('#returnSdPf').text(portfolio_sd_text);
-    d3.select("body").select('#returnSdPfText').text(portfolio_sd_value);
+    d3.select("body").select("#returnSdPf").text(portfolio_sd_text);
+    d3.select("body").select("#returnSdPfText").text(portfolio_sd_value);
 
-    bm_sd_text =  bm_sd_column.trim()+' Ending ' + last_return[date_column] + ':';
+    bm_sd_text =
+      bm_sd_column.trim() + " Ending " + last_return[date_column] + ":";
     bm_sd_value = parseFloat(last_return[bm_sd_column]).toFixed(5);
-    d3.select("body").select('#returnSdBm').text(bm_sd_text);
-    d3.select("body").select('#returnSdBmText').text(bm_sd_value);
+    d3.select("body").select("#returnSdBm").text(bm_sd_text);
+    d3.select("body").select("#returnSdBmText").text(bm_sd_value);
   }
 );
 
@@ -473,50 +327,19 @@ d3.csv(sharpe_url, { mode: "cors", headers: { origin: page_origin } }).then(
     date_column = "Date";
     benchmark_column = "Sharpe Ratio S&P (30 days)";
     portfolio_column = "Sharpe Ratio Portfolio (30 days)";
-    parseDate = d3.timeParse("%m/%d/%Y");
-    processed_data = [];
-    min_value = 0;
-    max_value = 0;
-    data.forEach(function (d) {
-      d[benchmark_column] = parseFloat(d[benchmark_column]).toFixed(2);
-      d[portfolio_column] = parseFloat(d[portfolio_column]).toFixed(2);
-      formatted_data_bm = {
-        Date: parseDate(d[date_column]),
-        Type: benchmark_column,
-        Sharpe: d[benchmark_column],
-      };
-      formatted_data_pf = {
-        Date: parseDate(d[date_column]),
-        Type: portfolio_column,
-        Sharpe: d[portfolio_column],
-      };
-      processed_data.push(formatted_data_bm);
-      processed_data.push(formatted_data_pf);
-      min_value = Math.min(min_value, d[benchmark_column], d[portfolio_column]);
-      max_value = Math.max(max_value, d[benchmark_column], d[portfolio_column]);
-    });
 
-    last_sharpe = data[data.length-1];
+    last_sharpe = data[data.length - 1];
 
-    portfolio_text =  portfolio_column.trim()+' Ending ' + last_sharpe[date_column] + ':';
+    portfolio_text =
+      portfolio_column.trim() + " Ending " + last_sharpe[date_column] + ":";
     portfolio_value = last_sharpe[portfolio_column];
-    d3.select("body").select('#currentSharpe').text(portfolio_text);
-    d3.select("body").select('#currentSharpeValueText').text(portfolio_value);
+    d3.select("body").select("#currentSharpe").text(portfolio_text);
+    d3.select("body").select("#currentSharpeValueText").text(portfolio_value);
 
-    bm_text =  benchmark_column.trim()+' Ending ' + last_sharpe[date_column] + ':';
+    bm_text =
+      benchmark_column.trim() + " Ending " + last_sharpe[date_column] + ":";
     bm_value = last_sharpe[benchmark_column];
-    d3.select("body").select('#currentSharpeBm').text(bm_text);
-    d3.select("body").select('#currentSharpeValueTextBm').text(bm_value);
-
-    createLineGraph(
-      "#sharpeChart",
-      processed_data,
-      "Sharpe",
-      min_value,
-      max_value,
-      "Date",
-      "Sharpe Ratio",
-      0
-    );
+    d3.select("body").select("#currentSharpeBm").text(bm_text);
+    d3.select("body").select("#currentSharpeValueTextBm").text(bm_value);
   }
 );
