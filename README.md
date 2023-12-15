@@ -12,3 +12,5 @@ final_eecs6893_port_opt_airflow_v2.py is used to run on the airflow including th
 (4)  run the weight recommendation based on Black-Litterman model   
 (5)  send the report files to Google Cloud databucket for report shown in the website   
 (6)  The report is shown on the website   
+
+files in the Website folder are used to show the report on the website
