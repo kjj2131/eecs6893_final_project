@@ -298,13 +298,13 @@ d3.csv(return_url, { mode: "cors", headers: { origin: page_origin } }).then(
 
     portfolio_text =
       portfolio_column.trim() + " Ending " + last_return[date_column] + ":";
-    portfolio_value = last_return[portfolio_column] + "%";
+    portfolio_value = parseFloat(last_return[portfolio_column]).toFixed(5) + "%";
     d3.select("body").select("#averageReturnPf").text(portfolio_text);
     d3.select("body").select("#averageReturnPfText").text(portfolio_value);
 
     bm_text =
       benchmark_column.trim() + " Ending " + last_return[date_column] + ":";
-    bm_value = last_return[benchmark_column] + "%";
+    bm_value = parseFloat(last_return[benchmark_column]).toFixed(5) + "%";
     d3.select("body").select("#averageReturnBm").text(bm_text);
     d3.select("body").select("#averageReturnBmText").text(bm_value);
 
@@ -332,13 +332,13 @@ d3.csv(sharpe_url, { mode: "cors", headers: { origin: page_origin } }).then(
 
     portfolio_text =
       portfolio_column.trim() + " Ending " + last_sharpe[date_column] + ":";
-    portfolio_value = last_sharpe[portfolio_column];
+    portfolio_value = parseFloat(last_sharpe[portfolio_column]).toFixed(3);
     d3.select("body").select("#currentSharpe").text(portfolio_text);
     d3.select("body").select("#currentSharpeValueText").text(portfolio_value);
 
     bm_text =
       benchmark_column.trim() + " Ending " + last_sharpe[date_column] + ":";
-    bm_value = last_sharpe[benchmark_column];
+    bm_value = parseFloat(last_sharpe[benchmark_column]).toFixed(3);
     d3.select("body").select("#currentSharpeBm").text(bm_text);
     d3.select("body").select("#currentSharpeValueTextBm").text(bm_value);
   }
