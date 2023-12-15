@@ -6,6 +6,7 @@ The performance of the past recommendation is also shown against S&P 500 perform
 
 File:
 final_eecs6893_port_opt_airflow_v2.py is used to run on the airflow including the following steps:
+
 (1)  download the data from sources   
 (2)  fit the machine learning model (XGBoost) and make the 1 day ahead prediction   
 (3)  pull the news feed from finnhub and feed it into finBert   
